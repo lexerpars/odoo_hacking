@@ -6,6 +6,8 @@ Created on Thu Jan 13 21:10:44 2022
 """
 
 from xmlrpc import client
+from urllib import request
+from bs4 import BeautifulSoup
 
 class Conexion:
     
@@ -43,6 +45,26 @@ class Conexion:
                 print('Acceso denegado: No se pueden listar las bases de datos')
             else:
                 print('Ocurrio un problema: ',str(e))
+    
+    def registro_odoo(self):
+        info_odoo = request.urlopen(self.host+'/web/login').read().decode()
+        web = BeautifulSoup(info_odoo,'html.parser')
+        etiquetas = web('a')
+        signup = False
+        reset_password = False
+        for etiqueta in etiquetas:
+            if 'web/signup' in etiqueta.get('href'):
+                signup = True
+                print('[*]Registro de usuario portal activo url :{}'.format(self.host+etiqueta.get('href')))
+            if 'web/reset_password' in etiqueta.get('href'):
+                reset_password = True
+                print('[*]Permite retablecer la contraseña de usuarios url :{}'.format(self.host+etiqueta.get('href')))
+        if not signup:
+            print('[-]No posee registro de usuarios de portal')
+        if not reset_password:
+            print('[-]No permite restablecer las contraseñas')
+                
+                
 
         
     

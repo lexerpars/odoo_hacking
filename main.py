@@ -35,6 +35,7 @@ def main(arguments):
     conexion = auth.Conexion(host=arguments.host)
     conexion.version()
     conexion.list_db()
+    conexion.registro_odoo()
     
     
 if __name__ == '__main__':
