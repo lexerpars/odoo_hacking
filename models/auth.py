@@ -63,6 +63,43 @@ class Conexion:
             print('[-]No posee registro de usuarios de portal')
         if not reset_password:
             print('[-]No permite restablecer las contraseñas')
+    
+    def apps_default_info(self):
+        try:
+            website_info = request.urlopen(self.host+'/website/info').read().decode()
+            website = BeautifulSoup(website_info,'html.parser')
+            etiquetas = website.select('dt a')
+            modulos = []
+            print('[*] Website info')
+            print('Aplicaciones instaladas')
+            for etiqueta in etiquetas:
+                modulos.append([etiqueta.text.replace('\n','').replace(' ',''), etiqueta.get('href').replace('\n','').replace(' ','')])
+            for modulo in modulos:
+                print(modulo)
+            return modulos
+                
+        except Exception as e:
+            print(self.host+'/website/info ',str(e))
+    
+    def auth_basic(self,dbs):
+        users = ['admin','administrador','administrator']
+        passwords = ['admin','123','1234','12345','123456']
+        auth = self.proxy('/xmlrpc/2/common')
+        result = []
+        for db in dbs:
+            print('Probando usuarios y claves para base de datos: ',db)
+            for user in users:
+                for password in passwords:
+                    uid = auth.authenticate(db,user,password,[])
+                    if uid:
+                        print('CREDENDECIALES VALIDAS usuario: ',user,' contraseña: ',password, ' DB: ',db)
+                        result.append([user,password,db])
+                        break
+        if result:
+            print('Credenciales validas: ',result)
+        return result
+                    
+        
                 
                 
 

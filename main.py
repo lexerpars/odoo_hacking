@@ -33,9 +33,14 @@ def main(arguments):
     print(welcome)
     print('[*] Target :',arguments.host)
     conexion = auth.Conexion(host=arguments.host)
-    conexion.version()
-    conexion.list_db()
-    conexion.registro_odoo()
+    version = conexion.version()
+    dbs = conexion.list_db()
+    registro = conexion.registro_odoo()
+    apps = False
+    if not dbs or len(dbs) <= 1:
+        apps = conexion.apps_default_info()
+    if dbs:
+        conexion.auth_basic(dbs)
     
     
 if __name__ == '__main__':
