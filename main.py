@@ -7,7 +7,8 @@ Created on Thu Jan 13 21:03:02 2022
 
 import argparse
 from models import auth
-
+from models import options
+from subprocess import call
 def parser():
     pars = argparse.ArgumentParser(description='Script hacking ODOO')
     pars.add_argument('host',help='URL o HOST de ODOO')
@@ -15,6 +16,7 @@ def parser():
     return arguments
 
 def main(arguments):
+    call('color a' ,shell=True)
     welcome = '''
    ____      _                   _    _            _    _             
   / __ \    | |                 | |  | |          | |  (_)            
@@ -34,13 +36,19 @@ def main(arguments):
     print('[*] Target :',arguments.host)
     conexion = auth.Conexion(host=arguments.host)
     version = conexion.version()
-    dbs = conexion.list_db()
-    registro = conexion.registro_odoo()
-    apps = False
-    if not dbs or len(dbs) <= 1:
-        apps = conexion.apps_default_info()
-    if dbs:
-        conexion.auth_basic(dbs)
+    if version:
+        dbs = conexion.list_db()
+        registro = conexion.registro_odoo()
+        apps = False
+        if not dbs or len(dbs) <= 1:
+            apps = conexion.apps_default_info()
+        if dbs:
+            op = input('Quiere probar las credenciales basicas [Si] o [No] ')
+            if op == 'Si':
+                conexion.auth_basic(dbs)
+    menu = options.Menu(arguments.host)
+    menu.MenuOpciones()
+    
     
     
 if __name__ == '__main__':

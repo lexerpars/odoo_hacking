@@ -23,22 +23,23 @@ class Conexion:
         conn = self.proxy('/xmlrpc/2/common')
         res = conn.version()
         if res:
-            version = res['server_serie']
-            tipo = 'Enterprise' if 'e' in res['server_version_info'][5].lower() else 'Community'
-            protocolo = res['protocol_version']
-            print('Version ODOO: ',version)
-            print('Tipo: ',tipo)
-            print('Version protocolo: ',protocolo)
-            return {'version':version,'tipo':tipo,'protocolo':protocolo}
-        else:
-            print('Este servidor no soporta el metodo version')
-            return False
+            try:
+                version = res['server_serie']
+                tipo = 'Enterprise' if 'e' in res['server_version_info'][5].lower() else 'Community'
+                protocolo = res['protocol_version']
+                print('Version ODOO: ',version)
+                print('Tipo: ',tipo)
+                print('Version protocolo: ',protocolo)
+                return {'version':version,'tipo':tipo,'protocolo':protocolo}
+            except Exception as e:
+                print('Este servidor no soporta el metodo version')
+                return False
     
     def list_db(self):
         try:
             conn = self.proxy('/xmlrpc/db')
             db = conn.list()
-            print(db)
+            print('[*] Listado de bases de datos: ',db)
             return db
         except Exception as e:
             if 'Access denied' in str(e):
@@ -87,7 +88,7 @@ class Conexion:
         auth = self.proxy('/xmlrpc/2/common')
         result = []
         for db in dbs:
-            print('Probando usuarios y claves para base de datos: ',db)
+            print('[*] Probando usuarios y claves para base de datos: ',db)
             for user in users:
                 for password in passwords:
                     uid = auth.authenticate(db,user,password,[])
@@ -96,7 +97,9 @@ class Conexion:
                         result.append([user,password,db])
                         break
         if result:
-            print('Credenciales validas: ',result)
+            print('[*] Credenciales validas: ',result)
+        if not result:
+            print('[-] Credenciales default probadas - ninguna es valida')
         return result
                     
         
