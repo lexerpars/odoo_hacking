@@ -48,22 +48,25 @@ class Conexion:
                 print('Ocurrio un problema: ',str(e))
     
     def registro_odoo(self):
-        info_odoo = request.urlopen(self.host+'/web/login').read().decode()
-        web = BeautifulSoup(info_odoo,'html.parser')
-        etiquetas = web('a')
-        signup = False
-        reset_password = False
-        for etiqueta in etiquetas:
-            if 'web/signup' in etiqueta.get('href'):
-                signup = True
-                print('[*]Registro de usuario portal activo url :{}'.format(self.host+etiqueta.get('href')))
-            if 'web/reset_password' in etiqueta.get('href'):
-                reset_password = True
-                print('[*]Permite retablecer la contraseña de usuarios url :{}'.format(self.host+etiqueta.get('href')))
-        if not signup:
-            print('[-]No posee registro de usuarios de portal')
-        if not reset_password:
-            print('[-]No permite restablecer las contraseñas')
+        try:
+            info_odoo = request.urlopen(self.host+'/web/login').read().decode()
+            web = BeautifulSoup(info_odoo,'html.parser')
+            etiquetas = web('a')
+            signup = False
+            reset_password = False
+            for etiqueta in etiquetas:
+                if 'web/signup' in etiqueta.get('href'):
+                    signup = True
+                    print('[*]Registro de usuario portal activo url :{}'.format(self.host+etiqueta.get('href')))
+                if 'web/reset_password' in etiqueta.get('href'):
+                    reset_password = True
+                    print('[*]Permite retablecer la contraseña de usuarios url :{}'.format(self.host+etiqueta.get('href')))
+            if not signup:
+                print('[-]No posee registro de usuarios de portal')
+            if not reset_password:
+                print('[-]No permite restablecer las contraseñas')
+        except Exception as e:
+            print('/web/login [{}]'.format(e))
     
     def apps_default_info(self):
         try:
