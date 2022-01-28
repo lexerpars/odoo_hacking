@@ -47,7 +47,7 @@ def main(arguments):
             if op == 'Si':
                 conexion.auth_basic(dbs)
     menu = options.Menu(arguments.host)
-    menu.MenuOpciones()
+    menu.MenuOpciones(version)
     
     
     

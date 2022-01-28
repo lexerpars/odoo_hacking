@@ -7,6 +7,7 @@ Created on Mon Jan 17 19:00:50 2022
 from . import auth
 import time
 import os
+from . import default_models as dm
 directory = os.getcwd()
 class Menu:
     
@@ -22,7 +23,7 @@ class Menu:
         return res
     
     
-    def MenuOpciones(self):
+    def MenuOpciones(self,version):
         user = input('Ingrese un usuario de portal o interno valido >> ')
         password = input('Ingrese una clave valida para el usuario >> ')
         self.db = input('Espeficique la base de datos a auditar >> ')
@@ -38,18 +39,19 @@ class Menu:
             print('\n')
             print('[1] Obtener modelos de instancia')
             print('[2] Obtener mensajes')
+            print('[3] Fuerza bruta accesos a modelos')
             print('[x] Salir')
             
             opcion = input('>> ')
             
             if opcion == '1':
-                try:
-                    acceso = self.check_access(uid, password, 'ir.model', query)
-                    print('Modelo : ir.model Access_Read : ',acceso['read'])
-                    print('Modelo : ir.model Access_write : ',acceso['write'])
-                    if acceso['read']:
-                        res = query.execute_kw(self.db,uid,password,'ir.model','search_read',[[]],{'fields':['name','model']})
-                        for r in res:
+                acceso = self.check_access(uid, password, 'ir.model', query)
+                print('Modelo : ir.model Access_Read : ',acceso['read'])
+                print('Modelo : ir.model Access_write : ',acceso['write'])
+                if acceso['read']:
+                    res = query.execute_kw(self.db,uid,password,'ir.model','search_read',[[]],{'fields':['name','model']})
+                    for r in res:
+                        try:
                             print('*'*50)
                             a = self.check_access(uid, password, r['model'], query)
                             print('Model: ',r['model'])
@@ -58,10 +60,10 @@ class Menu:
                             print('*'*50)
                             print('')
                             time.sleep(0.5)
-                            
-                    else:
-                        pass
-                except Exception as e:
+                        except Exception as e:
+                            pass
+                        
+                else:
                     pass
             if opcion == '2':
                 normaliza = lambda p : p if p else ''
@@ -81,6 +83,20 @@ class Menu:
                             f.write(record_mail['body_html'])
                             f.close()
                     time.sleep(4)
+            
+            if opcion == '3':
+                modelos = dm.default_models_odoo_old if version['version'] in ['9.0','10.0','11.0','12.0'] else dm.default_models_odoo_new
+                for m in modelos:
+                    try:
+                        acceso = self.check_access(uid, password, m, query)
+                        print('*'*50)
+                        print('Modelo : ',m,' Access_Read : [',acceso['read'],']')
+                        print('Modelo : ',m,' Access_write : [',acceso['write'],']')
+                        print('*'*50)
+                        print('')
+                    except Exception as e:
+                        pass
+                
                         
                 
             elif opcion == 'x':
