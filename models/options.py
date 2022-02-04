@@ -9,6 +9,7 @@ import time
 import os
 from . import default_models as dm
 directory = os.getcwd()
+lista_modelos = []
 class Menu:
     
     def __init__(self,host):
@@ -22,6 +23,17 @@ class Menu:
             res[ac] = access
         return res
     
+    def fields_models(self,uid,password,model,query):
+        fields = []
+        field = query.execute_kw(self.db,uid,password,model,'fields_get',[],{})
+        fields = [f for f in field]
+        return fields
+    
+    def read_model(self,uid,password,model,query,fields):
+        model = query.execute_kw(self.db,uid,password,model,'search_read',[],{'fields':fields})        
+        if model:
+            for m in model:
+                print(m)
     
     def MenuOpciones(self,version):
         user = input('Ingrese un usuario de portal o interno valido >> ')
@@ -40,6 +52,8 @@ class Menu:
             print('[1] Obtener modelos de instancia')
             print('[2] Obtener mensajes')
             print('[3] Fuerza bruta accesos a modelos')
+            print('[4] Listar modelos disponibles')
+            print('[5] Obtener informacion de modelo disponible')
             print('[x] Salir')
             
             opcion = input('>> ')
@@ -66,39 +80,59 @@ class Menu:
                 else:
                     pass
             if opcion == '2':
-                normaliza = lambda p : p if p else ''
-                path = '\mails_'+self.db
-                os.makedirs(directory+path, exist_ok=True)
-                model_mail = query.execute_kw(self.db,uid,password,'mail.mail','search_read',[[]],{'fields':['name']})
-                print(model_mail)
-                print(len(model_mail), 'Registros encontrados!')
-                print('Procesando informacion!')
-                for record in model_mail:
-                    record_mail = query.execute_kw(self.db,uid,password,'mail.mail','search_read',[[['id','=',record['id']]]],{'fields':['body_html','email_to','email_from']})
-                    if record_mail:
-                        record_mail =record_mail[0]
-                        with open('./mails_{}/'.format(self.db)+str(record['id'])+'.html','w') as f:
-                            f.write('email_to '+normaliza(record_mail['email_to']))
-                            f.write('email_from '+normaliza(record_mail['email_from']))
-                            f.write(record_mail['body_html'])
-                            f.close()
-                    time.sleep(4)
+                acceso = self.check_access(uid, password, 'mail.mail', query)
+                if acceso['read']:
+                    normaliza = lambda p : p if p else ''
+                    path = '\mails_'+self.db
+                    os.makedirs(directory+path, exist_ok=True)
+                    model_mail = query.execute_kw(self.db,uid,password,'mail.mail','search_read',[[]],{'fields':['name']})
+                    print(model_mail)
+                    print(len(model_mail), 'Registros encontrados!')
+                    print('Procesando informacion!')
+                    for record in model_mail:
+                        record_mail = query.execute_kw(self.db,uid,password,'mail.mail','search_read',[[['id','=',record['id']]]],{'fields':['body_html','email_to','email_from']})
+                        if record_mail:
+                            record_mail =record_mail[0]
+                            with open('./mails_{}/'.format(self.db)+str(record['id'])+'.html','w') as f:
+                                f.write('email_to '+normaliza(record_mail['email_to']))
+                                f.write('email_from '+normaliza(record_mail['email_from']))
+                                f.write(record_mail['body_html'])
+                                f.close()
+                        time.sleep(4)
+                else:
+                    print('No hay acceso a mail.mail')
             
             if opcion == '3':
                 modelos = dm.default_models_odoo_old if version['version'] in ['9.0','10.0','11.0','12.0'] else dm.default_models_odoo_new
+                verbose = input('Presione 1 para activar verbose!')
+                lista_modelos =[]
+                if not verbose:
+                    print('Iniciando fuerza bruta!')
                 for m in modelos:
                     try:
                         acceso = self.check_access(uid, password, m, query)
-                        print('*'*50)
-                        print('Modelo : ',m,' Access_Read : [',acceso['read'],']')
-                        print('Modelo : ',m,' Access_write : [',acceso['write'],']')
-                        print('*'*50)
-                        print('')
+                        if verbose == '1':
+                            print('*'*50)
+                            print('Modelo : ',m,' Access_Read : [',acceso['read'],']')
+                            print('Modelo : ',m,' Access_write : [',acceso['write'],']')
+                            print('*'*50)
+                            print('')
+                        if acceso['read'] or acceso['write']:
+                            lista_modelos.append(m)
                     except Exception as e:
                         pass
+                print('Proceso finalizado!')
+                    
+            if opcion == '4':
+                print('Listado de modelos disponibles')
+                for m in lista_modelos:
+                    print(str(lista_modelos.index(m)),' ',m)
+            
+            if opcion == '5':
+                fields = self.fields_models(uid, password, 'res.partner', query)
+                self.read_model(uid, password, 'res.users.log', query,['name'])
                 
                         
-                
             elif opcion == 'x':
                 op = False
 
