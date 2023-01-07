@@ -8,6 +8,7 @@ from . import auth
 import time
 import os
 from . import default_models as dm
+from getpass import getpass
 directory = os.getcwd()
 lista_modelos = []
 class Menu:
@@ -37,7 +38,7 @@ class Menu:
     
     def MenuOpciones(self,version):
         user = input('Ingrese un usuario de portal o interno valido >> ')
-        password = input('Ingrese una clave valida para el usuario >> ')
+        password = getpass()
         self.db = input('Espeficique la base de datos a auditar >> ')
         conexion = auth.Conexion(host=self.host)
         authentic = conexion.proxy('/xmlrpc/2/common')

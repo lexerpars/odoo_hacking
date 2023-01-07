@@ -16,7 +16,6 @@ def parser():
     return arguments
 
 def main(arguments):
-    call('color a' ,shell=True)
     welcome = '''
    ____      _                   _    _            _    _             
   / __ \    | |                 | |  | |          | |  (_)            

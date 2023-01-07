@@ -13,3 +13,8 @@ Obtiene la siguiente informacion:
 
 Uso: python main.py url
 Ejemplo url = https://www.guatewares.com , http://localhost, http://192.0.0.1
+python main.py http://localhost:8069
+python3 main.py http://localhost:8069
+
+Requiere BS4 para su funcionamiento:
+sudo apt-get install python3-bs4
